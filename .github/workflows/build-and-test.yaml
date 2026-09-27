@@ -52,3 +52,35 @@ jobs:
     - name: Test
       working-directory: ${{ github.workspace }}/build
       run: ctest -C ${{ matrix.build-type }}
+
+  macos-arm:
+    strategy:
+      matrix:
+        build-type: [ Debug, Release ]
+      fail-fast: false
+    runs-on: macos-26
+    steps:
+    - uses: actions/checkout@v5
+    - name: Install Dependencies
+      run: |
+        brew install \
+          cmake \
+          portaudio \
+          libsndfile
+    - name: Configure
+      run: >
+        cmake
+        -B ${{ github.workspace }}/build
+        -DCMAKE_BUILD_TYPE=${{ matrix.build-type }}
+        -DBUILD_TESTING=ON
+        -DENABLE_MP3LAME=ON
+        -DENABLE_SNDFILE=ON
+        -DENABLE_OPUS=ON
+        -DENABLE_VORBIS=ON
+    - name: Build
+      working-directory: ${{ github.workspace }}/build
+      run: cmake --build . --config ${{ matrix.build-type }}
+    - name: Test
+      working-directory: ${{ github.workspace }}/build
+      run: ctest -C ${{ matrix.build-type }}
+      
